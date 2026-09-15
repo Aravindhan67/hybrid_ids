@@ -1,0 +1,24 @@
+# Python
+venv/
+env/
+ml_pipeline/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node
+node_modules/
+.next/
+out/
+build/
+
+# Datasets & Uploads
+dataset/
+backend/uploads/
+*.apk
+*.csv
+
+# OS
+.DS_Store
+Thumbs.db

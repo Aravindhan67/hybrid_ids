@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # Point to the mock sandbox container running on the same network
+      - SANDBOX_URL=http://sandbox:8090/tasks/create/file
+      - SANDBOX_REPORT_URL=http://sandbox:8090/tasks/report
+      - SANDBOX_API_KEY=your_sandbox_api_key
+
+  sandbox:
+    build:
+      context: ./sandbox_mock
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"

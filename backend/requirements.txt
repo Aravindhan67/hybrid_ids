@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+requests
+pandas
+joblib
+scikit-learn
+androguard
+shap
