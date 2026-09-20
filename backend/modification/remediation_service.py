@@ -213,30 +213,13 @@ def apply_remediation(session_id: str, permission_actions: list) -> dict:
         session["changes_applied"] = changes
         session["status"]          = "REANALYZING"
 
-        # ── Step 3: Re-extract from ORIGINAL APK ─────────────────────────
-        orig_static_df, orig_apk_details = extract_static_features(
-            session["original_apk_path"]
-        )
+        # ── Step 3: Re-extract from MODIFIED APK ─────────────────────────
+        mod_static_df, mod_apk_details = extract_static_features(mod_apk_path)
 
-        if orig_static_df is None:
+        if mod_static_df is None:
             session["status"] = "FAILED"
-            session["error"]  = "Could not extract static features from the original APK."
+            session["error"]  = "Could not extract static features from the modified APK."
             return session
-
-        # ── Step 4: Zero out removed/restricted permissions in feature vector ────
-        mod_static_df = orig_static_df.copy()
-        for col in mod_static_df.columns:
-            if col in full_names_zero or col in short_names_zero:
-                mod_static_df[col] = 0
-
-        # ── Step 5: Build modified app_details ────────────────────────────
-        mod_apk_details = copy.deepcopy(orig_apk_details or {})
-        if mod_apk_details.get("permissions"):
-            mod_apk_details["permissions"] = [
-                p for p in mod_apk_details["permissions"]
-                if p not in full_names_zero
-                and p.split(".")[-1] not in short_names_zero
-            ]
 
         # ── Step 6: Dynamic analysis (mock sandbox) ───────────────────────
         mod_dynamic_df = run_dynamic_analysis(mod_apk_path, DYNAMIC_FEATURES_PATH)
@@ -245,7 +228,10 @@ def apply_remediation(session_id: str, permission_actions: list) -> dict:
         mod_prediction = predict_hybrid(mod_static_df, mod_dynamic_df)
         mod_prediction["filename"]          = mod_filename
         mod_prediction["app_details"]       = mod_apk_details
-        mod_prediction["reanalysis_method"] = "feature_vector_simulation"
+        mod_prediction["reanalysis_method"] = "real_static_extraction"
+        
+        # MOCK SIGNING - Update flags
+        session["signing_status"] = "MOCK_SIGNED"
 
         session["modified_result"]  = mod_prediction
         session["modified_details"] = mod_apk_details
