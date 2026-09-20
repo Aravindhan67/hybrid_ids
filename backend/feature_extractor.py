@@ -27,18 +27,27 @@ def extract_static_features(apk_path):
     feature_vector = {col: 0 for col in model_columns}
     
     # Extract general details
+    # Note: Some fields (version_name, version_code) may be absent in
+    # modified APKs whose manifests have been rewritten as plain-text XML.
+    # We use .get_*() wrappers defensively to avoid KeyError.
+    def _safe_get(fn):
+        try:
+            return fn()
+        except (KeyError, AttributeError, TypeError):
+            return None
+
     apk_details = {
-        "package_name": apk.get_package(),
-        "app_name": apk.get_app_name(),
-        "version_name": apk.get_androidversion_name(),
-        "version_code": apk.get_androidversion_code(),
-        "target_sdk": apk.get_target_sdk_version(),
-        "min_sdk": apk.get_min_sdk_version(),
-        "permissions": list(apk.get_permissions()),
-        "activities": list(apk.get_activities()),
-        "services": list(apk.get_services()),
-        "receivers": list(apk.get_receivers()),
-        "providers": list(apk.get_providers())
+        "package_name":  _safe_get(apk.get_package),
+        "app_name":      _safe_get(apk.get_app_name),
+        "version_name":  _safe_get(apk.get_androidversion_name),
+        "version_code":  _safe_get(apk.get_androidversion_code),
+        "target_sdk":    _safe_get(apk.get_target_sdk_version),
+        "min_sdk":       _safe_get(apk.get_min_sdk_version),
+        "permissions":   list(apk.get_permissions()),
+        "activities":    list(apk.get_activities()),
+        "services":      list(apk.get_services()),
+        "receivers":     list(apk.get_receivers()),
+        "providers":     list(apk.get_providers()),
     }
     
     # Extract Permissions
