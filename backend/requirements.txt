@@ -4,6 +4,7 @@ python-multipart
 requests
 pandas
 joblib
-scikit-learn
+scikit-learn==1.5.0
 androguard
 shap
+python-dotenv

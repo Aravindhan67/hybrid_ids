@@ -14,6 +14,7 @@ for _p in [_backend_dir, _root_dir]:
 from feature_extractor import extract_static_features
 from sandbox_client import run_dynamic_analysis
 from ml_pipeline.hybrid_classifier import predict_hybrid
+from signature_detector import check_signature
 
 # Import the new Remediation & Re-analysis module router
 from modification.router import router as remediation_router
@@ -52,6 +53,9 @@ async def analyze_apk(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
         
     try:
+        # 0. Signature-Based Detection
+        sig_result = check_signature(file_path)
+
         # 1. Extract static features and details from APK
         static_features_df, apk_details = extract_static_features(file_path)
         
@@ -69,6 +73,22 @@ async def analyze_apk(file: UploadFile = File(...)):
         # Add metadata and extracted app details
         result["filename"] = file.filename
         result["app_details"] = apk_details
+        result["signature_match"] = sig_result["is_malware"]
+        result["signature_hash"] = sig_result["hash"]
+        result["vt_details"] = sig_result.get("vt_details")
+
+        # 4. If signature matched malware, override the final ML prediction to be 100% Critical
+        if sig_result["is_malware"]:
+            result["prediction"] = "Malware"
+            result["confidence_score"] = 100.0
+            result["risk_level"] = "Critical"
+            # We optionally prepend the signature explanation
+            result["explanations"].insert(0, {
+                "feature": "Signature Match",
+                "description": sig_result["description"],
+                "impact": 1.0,
+                "is_present": True
+            })
         
         return result
         
