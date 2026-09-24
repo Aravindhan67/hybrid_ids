@@ -4,7 +4,7 @@ import shutil
 import sys
 import os
 
-# Ensure ml_pipeline and modification package are importable
+# Ensure ml_pipeline package is importable
 _backend_dir = os.path.dirname(os.path.abspath(__file__))
 _root_dir    = os.path.dirname(_backend_dir)
 for _p in [_backend_dir, _root_dir]:
@@ -16,8 +16,7 @@ from sandbox_client import run_dynamic_analysis
 from ml_pipeline.hybrid_classifier import predict_hybrid
 from signature_detector import check_signature
 
-# Import the new Remediation & Re-analysis module router
-from modification.router import router as remediation_router
+
 
 app = FastAPI(title="Hybrid IDS API", version="2.0.0")
 
@@ -33,13 +32,12 @@ app.add_middleware(
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ── Register routers ──────────────────────────────────────────────────────────
-app.include_router(remediation_router)
+
 
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the Hybrid IDS API v2 — with Remediation Module"}
+    return {"message": "Welcome to the Hybrid IDS API v2"}
 
 @app.post("/api/analyze")
 async def analyze_apk(file: UploadFile = File(...)):

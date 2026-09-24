@@ -124,10 +124,10 @@ def predict_hybrid(static_features, dynamic_features, weight_static=0.5, weight_
             
     return {
         "prediction": "Malware" if is_malware else "Benign",
-        "confidence_score": round(final_confidence * 100, 2),
+        "confidence_score": float(round(final_confidence * 100, 2)),
         "risk_level": risk_level,
-        "static_malware_prob": round(static_prob * 100, 2),
-        "dynamic_malware_prob": round(dynamic_prob * 100, 2),
+        "static_malware_prob": float(round(static_prob * 100, 2)),
+        "dynamic_malware_prob": float(round(dynamic_prob * 100, 2)),
         "explanations": top_explanations
     }
 

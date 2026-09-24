@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 from sklearn.metrics import classification_report, accuracy_score
+from imblearn.over_sampling import SMOTE
 import joblib
 import os
 
@@ -38,8 +39,12 @@ def train_static_model():
     # Train Test Split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    print("Training Static Model (Random Forest)...")
-    clf = RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=42)
+    # Apply SMOTE to handle class imbalance
+    smote = SMOTE(random_state=42)
+    X_train, y_train = smote.fit_resample(X_train, y_train)
+    
+    print("Training Static Model (XGBoost with SMOTE)...")
+    clf = XGBClassifier(n_estimators=500, max_depth=8, learning_rate=0.05, subsample=0.8, colsample_bytree=0.8, n_jobs=-1, random_state=42)
     clf.fit(X_train, y_train)
     
     # Evaluate
@@ -79,8 +84,12 @@ def train_dynamic_model():
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    print("Training Dynamic Model (Random Forest)...")
-    clf = RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=42)
+    # Apply SMOTE
+    smote = SMOTE(random_state=42)
+    X_train, y_train = smote.fit_resample(X_train, y_train)
+    
+    print("Training Dynamic Model (XGBoost with SMOTE)...")
+    clf = XGBClassifier(n_estimators=500, max_depth=8, learning_rate=0.05, subsample=0.8, colsample_bytree=0.8, n_jobs=-1, random_state=42)
     clf.fit(X_train, y_train)
     
     # Evaluate
